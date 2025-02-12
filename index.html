@@ -15,38 +15,30 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            gap: 15px;
+            padding: 20px;
         }
         .video {
-            margin: 10px;
+            flex: 1 1 320px;
+            max-width: 320px;
             text-align: center;
         }
         iframe {
-            width: 320px;
+            width: 100%;
             height: 180px;
-        }
-        #loadMore {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            background-color: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
         }
     </style>
 </head>
 <body>
     <h1>IQSOG - Toutes les vidéos de la playlist</h1>
     <div class="container" id="videoContainer"></div>
-    <button id="loadMore">Charger plus de vidéos</button>
 
     <script type="module">
         import API_KEY from './config.js';
 
         const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC";
-        const maxResults = 50; // Charge 50 vidéos max à la fois
-        let nextPageToken = ""; // Pour la pagination
+        const maxResults = 20; 
+        let nextPageToken = "";
 
         async function fetchVideos() {
             let url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}`;
@@ -57,41 +49,4 @@
                 const data = await response.json();
 
                 if (data.items) {
-                    displayVideos(data.items);
-                }
-
-                // Vérifier s'il reste encore des vidéos à charger
-                nextPageToken = data.nextPageToken || "";
-                if (!nextPageToken) {
-                    document.getElementById("loadMore").style.display = "none";
-                }
-            } catch (error) {
-                console.error("Erreur lors du chargement des vidéos", error);
-            }
-        }
-
-        function displayVideos(videos) {
-            const container = document.getElementById("videoContainer");
-
-            videos.forEach(video => {
-                const videoId = video.snippet.resourceId.videoId;
-                const title = video.snippet.title;
-
-                const videoElement = document.createElement("div");
-                videoElement.className = "video";
-                videoElement.innerHTML = `
-                    <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-                    <p>${title}</p>
-                `;
-                container.appendChild(videoElement);
-            });
-        }
-
-        // Lancer le chargement initial
-        fetchVideos();
-        
-        // Ajouter un bouton pour charger plus de vidéos
-        document.getElementById("loadMore").addEventListener("click", fetchVideos);
-    </script>
-</body>
-</html>
+                    d
