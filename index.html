@@ -3,100 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IQSOG - Playlist YouTube</title>
+    <title>IQSOG - Toutes les vidéos de la playlist</title>
     <style>
         body {
-            background-color: #141414;
+            background-color: black;
             color: white;
             font-family: Arial, sans-serif;
             text-align: center;
         }
-
-        h1 {
-            font-size: 2em;
-            margin-top: 20px;
-        }
-
         .container {
-            width: 90%;
+            width: 80%;
             margin: auto;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
         }
-
         .video {
+            margin-bottom: 20px;
+        }
+        iframe {
             width: 320px;
             height: 180px;
         }
-
-        @media (max-width: 600px) {
-            .video {
-                width: 100%;
-                height: auto;
-            }
+        #loadMoreBtn {
+            display: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #loadMoreBtn:hover {
+            background-color: darkred;
         }
     </style>
 </head>
 <body>
+
     <h1>IQSOG - Toutes les vidéos de la playlist</h1>
     <div class="container" id="videoContainer"></div>
-    <button id="loadMoreBtn" style="display: none;">Charger plus</button>
+    <button id="loadMoreBtn">Charger plus</button>
 
     <script type="module">
->
-let nextPageToken = ""; 
-const maxResults = 50; 
-const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC"; 
+        import API_KEY from './config.js';
 
-async function fetchVideos() {
-    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}&pageToken=${nextPageToken}`;
+        let nextPageToken = ""; 
+        const maxResults = 50; 
+        const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC"; 
 
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
+        async function fetchVideos() {
+            const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}&pageToken=${nextPageToken}`;
 
-        if (data.items) {
-            displayVideos(data.items);
-            nextPageToken = data.nextPageToken || ""; 
-            toggleLoadMoreButton();
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.items) {
+                    displayVideos(data.items);
+                    nextPageToken = data.nextPageToken || ""; 
+                    toggleLoadMoreButton();
+                }
+            } catch (error) {
+                console.error("Erreur lors du chargement des vidéos :", error);
+            }
         }
-    } catch (error) {
-        console.error("Erreur lors du chargement des vidéos :", error);
-    }
-}
 
-function displayVideos(videos) {
-    const container = document.getElementById("videoContainer");
+        function displayVideos(videos) {
+            const container = document.getElementById("videoContainer");
 
-    videos.forEach(video => {
-        const videoId = video.snippet.resourceId.videoId;
-        const title = video.snippet.title;
+            videos.forEach(video => {
+                const videoId = video.snippet.resourceId.videoId;
+                const title = video.snippet.title;
 
-        const videoElement = document.createElement("div");
-        videoElement.classList.add("video");
-        videoElement.innerHTML = `
-            <iframe width="320" height="180" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-            <p>${title}</p>
-        `;
-        container.appendChild(videoElement);
-    });
-}
+                const videoElement = document.createElement("div");
+                videoElement.classList.add("video");
+                videoElement.innerHTML = `
+                    <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+                    <p>${title}</p>
+                `;
+                container.appendChild(videoElement);
+            });
+        }
 
-function toggleLoadMoreButton() {
-    const loadMoreBtn = document.getElementById("loadMoreBtn");
-    if (nextPageToken) {
-        loadMoreBtn.style.display = "block";
-    } else {
-        loadMoreBtn.style.display = "none";
-    }
-}
+        function toggleLoadMoreButton() {
+            const loadMoreBtn = document.getElementById("loadMoreBtn");
+            if (nextPageToken) {
+                loadMoreBtn.style.display = "block";
+            } else {
+                loadMoreBtn.style.display = "none";
+            }
+        }
 
-document.getElementById("loadMoreBtn").addEventListener("click", fetchVideos);
+        document.getElementById("loadMoreBtn").addEventListener("click", fetchVideos);
 
-fetchVideos(); 
-
+        fetchVideos(); 
     </script>
+
 </body>
 </html>
