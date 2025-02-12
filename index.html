@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IQSOG Vidéos</title>
+    <title>IQSOG - Playlist YouTube</title>
     <style>
         body {
             background-color: #141414;
@@ -14,27 +14,76 @@
 
         h1 {
             font-size: 2em;
-            font-weight: bold;
             margin-top: 20px;
         }
 
         .container {
-            width: 80%;
+            width: 90%;
             margin: auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
         }
 
-        .container iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
+        .video {
+            width: 320px;
+            height: 180px;
+        }
+
+        @media (max-width: 600px) {
+            .video {
+                width: 100%;
+                height: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Bienvenue sur IQSOG Vidéos 🎬</h1>
-    <div class="container">
-        <div id="flockler-embed-194f9d5b7e006be7c62196cd1901c619"></div>
-        <script src="https://plugins.flockler.com/embed/194f9d1763f0132fd0b7b38b2a7d0916/194f9d5b7e006be7c62196cd1901c619" async></script>
-    </div>
+    <h1>IQSOG - Toutes les vidéos de la playlist</h1>
+    <div class="container" id="videoContainer"></div>
+
+    <script>
+        // Ta clé API et l'ID de la playlist
+        const apiKey = "AIzaSyAs9KxejYgR1nyG9YRZx8qm7U5i1p-ZJRE";
+        const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC";
+        const maxResults = 50; // YouTube limite à 50 vidéos par requête
+        let nextPageToken = ""; // Pour récupérer toutes les vidéos en plusieurs requêtes
+
+        async function fetchVideos(pageToken = "") {
+            const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${apiKey}&pageToken=${pageToken}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.items) {
+                displayVideos(data.items);
+            }
+
+            // Si une autre page de vidéos est disponible, on continue à charger
+            if (data.nextPageToken) {
+                nextPageToken = data.nextPageToken;
+                fetchVideos(nextPageToken);
+            }
+        }
+
+        function displayVideos(videos) {
+            const container = document.getElementById("videoContainer");
+
+            videos.forEach(video => {
+                const videoId = video.snippet.resourceId.videoId;
+                const title = video.snippet.title;
+
+                const videoElement = document.createElement("div");
+                videoElement.innerHTML = `
+                    <iframe class="video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+                    <p>${title}</p>
+                `;
+                container.appendChild(videoElement);
+            });
+        }
+
+        // Lancer la récupération des vidéos
+        fetchVideos();
+    </script>
 </body>
 </html>
