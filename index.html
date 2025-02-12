@@ -12,62 +12,45 @@
             text-align: center;
         }
         .container {
-            width: 80%;
-            margin: auto;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
         }
         .video {
-            width: calc(33.33% - 20px); /* 3 vidéos par ligne */
-            max-width: 320px;
-            margin-bottom: 20px;
+            margin: 10px;
+            text-align: center;
         }
         iframe {
-            width: 100%;
+            width: 320px;
             height: 180px;
         }
-        #loadMoreBtn {
-            display: none;
+        #loadMore {
+            display: block;
+            margin: 20px auto;
             padding: 10px 20px;
-            font-size: 16px;
             background-color: red;
             color: white;
             border: none;
             cursor: pointer;
-            margin-top: 20px;
-        }
-        #loadMoreBtn:hover {
-            background-color: darkred;
-        }
-
-        /* 📱 Mobile : Une seule vidéo par ligne */
-        @media (max-width: 800px) {
-            .container {
-                display: block;
-            }
-            .video {
-                width: 100%;
-            }
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-
     <h1>IQSOG - Toutes les vidéos de la playlist</h1>
     <div class="container" id="videoContainer"></div>
-    <button id="loadMoreBtn">Charger plus</button>
+    <button id="loadMore">Charger plus de vidéos</button>
 
-    <script src="./config.js"></script>
-    <script>
-        const API_KEY = window.API_KEY;
-        let nextPageToken = ""; 
-        const maxResults = 50; 
-        const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC"; 
+    <script type="module">
+        import API_KEY from './config.js';
+
+        const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC";
+        const maxResults = 50; // Charge 50 vidéos max à la fois
+        let nextPageToken = ""; // Pour la pagination
 
         async function fetchVideos() {
-            const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}&pageToken=${nextPageToken}`;
+            let url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}`;
+            if (nextPageToken) url += `&pageToken=${nextPageToken}`;
 
             try {
                 const response = await fetch(url);
@@ -75,11 +58,15 @@
 
                 if (data.items) {
                     displayVideos(data.items);
-                    nextPageToken = data.nextPageToken || ""; 
-                    toggleLoadMoreButton();
+                }
+
+                // Vérifier s'il reste encore des vidéos à charger
+                nextPageToken = data.nextPageToken || "";
+                if (!nextPageToken) {
+                    document.getElementById("loadMore").style.display = "none";
                 }
             } catch (error) {
-                console.error("Erreur lors du chargement des vidéos :", error);
+                console.error("Erreur lors du chargement des vidéos", error);
             }
         }
 
@@ -91,7 +78,7 @@
                 const title = video.snippet.title;
 
                 const videoElement = document.createElement("div");
-                videoElement.classList.add("video");
+                videoElement.className = "video";
                 videoElement.innerHTML = `
                     <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
                     <p>${title}</p>
@@ -100,19 +87,11 @@
             });
         }
 
-        function toggleLoadMoreButton() {
-            const loadMoreBtn = document.getElementById("loadMoreBtn");
-            if (nextPageToken) {
-                loadMoreBtn.style.display = "block";
-            } else {
-                loadMoreBtn.style.display = "none";
-            }
-        }
-
-        document.getElementById("loadMoreBtn").addEventListener("click", fetchVideos);
-
-        fetchVideos(); 
+        // Lancer le chargement initial
+        fetchVideos();
+        
+        // Ajouter un bouton pour charger plus de vidéos
+        document.getElementById("loadMore").addEventListener("click", fetchVideos);
     </script>
-
 </body>
 </html>
