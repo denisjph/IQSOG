@@ -1,1 +1,2 @@
-window.API_KEY = "AIzaSyDVHyaPiZ6jzx6bRauEJ2MY2wkYafhPMNw";
+const API_KEY = "AIzaSyDVHyaPiZ6jzx6bRauEJ2MY2wkYafhPMNw";
+export default API_KEY;
