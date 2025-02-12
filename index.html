@@ -42,48 +42,61 @@
 <body>
     <h1>IQSOG - Toutes les vidéos de la playlist</h1>
     <div class="container" id="videoContainer"></div>
+    <button id="loadMoreBtn" style="display: none;">Charger plus</button>
 
-    <script>
-        // Ta clé API et l'ID de la playlist
-        import API_KEY from './config.js';
-        const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC";
-        const maxResults = 50; // YouTube limite à 50 vidéos par requête
-        let nextPageToken = ""; // Pour récupérer toutes les vidéos en plusieurs requêtes
+    <script type="module">
+>
+let nextPageToken = ""; 
+const maxResults = 50; 
+const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC"; 
 
-        async function fetchVideos(pageToken = "") {
-            const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${apiKey}&pageToken=${pageToken}`;
-            const response = await fetch(url);
-            const data = await response.json();
+async function fetchVideos() {
+    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}&pageToken=${nextPageToken}`;
 
-            if (data.items) {
-                displayVideos(data.items);
-            }
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
 
-            // Si une autre page de vidéos est disponible, on continue à charger
-            if (data.nextPageToken) {
-                nextPageToken = data.nextPageToken;
-                fetchVideos(nextPageToken);
-            }
+        if (data.items) {
+            displayVideos(data.items);
+            nextPageToken = data.nextPageToken || ""; 
+            toggleLoadMoreButton();
         }
+    } catch (error) {
+        console.error("Erreur lors du chargement des vidéos :", error);
+    }
+}
 
-        function displayVideos(videos) {
-            const container = document.getElementById("videoContainer");
+function displayVideos(videos) {
+    const container = document.getElementById("videoContainer");
 
-            videos.forEach(video => {
-                const videoId = video.snippet.resourceId.videoId;
-                const title = video.snippet.title;
+    videos.forEach(video => {
+        const videoId = video.snippet.resourceId.videoId;
+        const title = video.snippet.title;
 
-                const videoElement = document.createElement("div");
-                videoElement.innerHTML = `
-                    <iframe class="video" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-                    <p>${title}</p>
-                `;
-                container.appendChild(videoElement);
-            });
-        }
+        const videoElement = document.createElement("div");
+        videoElement.classList.add("video");
+        videoElement.innerHTML = `
+            <iframe width="320" height="180" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+            <p>${title}</p>
+        `;
+        container.appendChild(videoElement);
+    });
+}
 
-        // Lancer la récupération des vidéos
-        fetchVideos();
+function toggleLoadMoreButton() {
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+    if (nextPageToken) {
+        loadMoreBtn.style.display = "block";
+    } else {
+        loadMoreBtn.style.display = "none";
+    }
+}
+
+document.getElementById("loadMoreBtn").addEventListener("click", fetchVideos);
+
+fetchVideos(); 
+
     </script>
 </body>
 </html>
