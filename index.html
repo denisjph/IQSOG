@@ -17,10 +17,11 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
         }
         .video {
-            width: 320px;
+            width: calc(33.33% - 20px); /* 3 vidéos par ligne */
+            max-width: 320px;
             margin-bottom: 20px;
         }
         iframe {
@@ -41,8 +42,8 @@
             background-color: darkred;
         }
 
-        /* 📱 Mobile : Les vidéos s'affichent à la suite */
-        @media (max-width: 600px) {
+        /* 📱 Mobile : Une seule vidéo par ligne */
+        @media (max-width: 800px) {
             .container {
                 display: block;
             }
