@@ -1,3 +1,4 @@
-const API_KEY = "TA_CLE_API_ICI"; // Mets ici ta vraie clé API
-export { API_KEY };
+const API_KEY = "AIzaSyDVHyaPiZ6jzx6bRauEJ2MY2wkYafhPMNw";
+export API_KEY;
+
 
