@@ -51,7 +51,7 @@
     <h1>IQSOG - Toutes les vidéos de la playlist</h1>
     <div class="video-container" id="videoContainer"></div>
 
-    <script src="config.js"></script>
+    <script src="config.js"></script> <!-- Import de config.js AVANT -->
     <script>
         const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC"; // Playlist ID correct
         const maxResults = 50;
@@ -59,8 +59,12 @@
 
         async function fetchVideos(pageToken = "") {
             try {
+                if (!window.API_KEY) {
+                    throw new Error("Clé API non chargée");
+                }
+
                 const response = await fetch(
-                    `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}&pageToken=${pageToken}`
+                    `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${window.API_KEY}&pageToken=${pageToken}`
                 );
                 const data = await response.json();
 
