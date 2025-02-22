@@ -3,38 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IQSOG Vidéos</title>
+    <title>IQSOG - Toutes les vidéos de la playlist</title>
     <style>
         body {
-            background-color: #141414;
+            background-color: black;
             color: white;
             font-family: Arial, sans-serif;
             text-align: center;
         }
 
         h1 {
-            font-size: 2em;
-            font-weight: bold;
             margin-top: 20px;
         }
 
-        .container {
-            width: 80%;
-            margin: auto;
+        .video-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
         }
 
-        .container iframe {
+        .video {
+            width: 320px;
+        }
+
+        iframe {
             width: 100%;
-            height: 600px;
+            height: 180px;
             border: none;
+        }
+
+        @media (max-width: 600px) {
+            .video-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .video {
+                width: 100%;
+                max-width: 480px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Bienvenue sur IQSOG Vidéos 🎬</h1>
-    <div class="container">
-        <div id="flockler-embed-194f9d5b7e006be7c62196cd1901c619"></div>
-        <script src="https://plugins.flockler.com/embed/194f9d1763f0132fd0b7b38b2a7d0916/194f9d5b7e006be7c62196cd1901c619" async></script>
-    </div>
+    <h1>IQSOG - Toutes les vidéos de la playlist</h1>
+    <div class="video-container" id="videoContainer"></div>
+
+    <script src="config.js"></script>
+    <script>
+        const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC"; // Playlist ID correct
+        const maxResults = 50;
+        let nextPageToken = "";
+
+        async function fetchVideos(pageToken = "") {
+            try {
+                const response = await fetch(
+                    `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}&pageToken=${pageToken}`
+                );
+                const data = await response.json();
+
+                if (data.items) {
+                    displayVideos(data.items);
+                }
+
+                if (data.nextPageToken) {
+                    nextPageToken = data.nextPageToken;
+                    fetchVideos(nextPageToken);
+                }
+            } catch (error) {
+                console.error("Erreur lors du chargement des vidéos:", error);
+            }
+        }
+
+        function displayVideos(videos) {
+            const container = document.getElementById("videoContainer");
+
+            videos.forEach(video => {
+                const videoId = video.snippet.resourceId.videoId;
+                const title = video.snippet.title;
+
+                const videoElement = document.createElement("div");
+                videoElement.classList.add("video");
+                videoElement.innerHTML = `
+                    <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                    <p>${title}</p>
+                `;
+
+                container.appendChild(videoElement);
+            });
+        }
+
+        fetchVideos();
+    </script>
 </body>
 </html>
