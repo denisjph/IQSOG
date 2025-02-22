@@ -16,6 +16,18 @@
             margin-top: 20px;
         }
 
+        #main-player {
+            width: 80%;
+            max-width: 800px;
+            margin: 20px auto;
+            display: none;
+        }
+
+        #main-player iframe {
+            width: 100%;
+            height: 450px;
+        }
+
         .video-container {
             display: flex;
             flex-wrap: wrap;
@@ -26,7 +38,7 @@
 
         .video {
             width: 320px;
-            position: relative;
+            cursor: pointer;
         }
 
         iframe {
@@ -35,13 +47,14 @@
             border: none;
         }
 
-        /* Amélioration sur mobile */
         @media (max-width: 600px) {
+            #main-player iframe {
+                height: 250px;
+            }
             .video-container {
                 flex-direction: column;
                 align-items: center;
             }
-
             .video {
                 width: 100%;
                 max-width: 480px;
@@ -51,19 +64,20 @@
 </head>
 <body>
     <h1>IQSOG - L'Innovation par la Valorisation</h1>
+    
+    <div id="main-player">
+        <iframe id="main-video" src="" allowfullscreen></iframe>
+    </div>
+    
     <div class="video-container" id="videoContainer"></div>
 
     <script src="config.js"></script>
     <script>
-        const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC"; // Playlist ID correct
-        const maxResults = 10; // Charge 10 vidéos à la fois pour éviter le lag
+        const playlistId = "PLO9xMtCoQUxEb4cgnb48F58wVqtNOxeaC";
+        const maxResults = 50;
         let nextPageToken = "";
-        let isLoading = false;
 
         async function fetchVideos(pageToken = "") {
-            if (isLoading) return;
-            isLoading = true;
-
             try {
                 const response = await fetch(
                     `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=${maxResults}&playlistId=${playlistId}&key=${API_KEY}&pageToken=${pageToken}`
@@ -76,19 +90,16 @@
 
                 if (data.nextPageToken) {
                     nextPageToken = data.nextPageToken;
-                } else {
-                    nextPageToken = null;
+                    fetchVideos(nextPageToken);
                 }
             } catch (error) {
                 console.error("Erreur lors du chargement des vidéos:", error);
             }
-
-            isLoading = false;
         }
 
         function displayVideos(videos) {
             const container = document.getElementById("videoContainer");
-
+            
             videos.forEach(video => {
                 const videoId = video.snippet.resourceId.videoId;
                 const title = video.snippet.title;
@@ -96,43 +107,24 @@
                 const videoElement = document.createElement("div");
                 videoElement.classList.add("video");
                 videoElement.innerHTML = `
-                    <iframe data-src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                    <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
                     <p>${title}</p>
                 `;
-
+                
+                videoElement.addEventListener("click", () => {
+                    showMainVideo(videoId);
+                });
+                
                 container.appendChild(videoElement);
             });
-
-            lazyLoadVideos();
         }
 
-        function lazyLoadVideos() {
-            const iframes = document.querySelectorAll("iframe[data-src]");
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const iframe = entry.target;
-                        iframe.src = iframe.getAttribute("data-src");
-                        iframe.removeAttribute("data-src");
-                        observer.unobserve(iframe);
-                    }
-                });
-            });
-
-            iframes.forEach(iframe => observer.observe(iframe));
+        function showMainVideo(videoId) {
+            const mainPlayer = document.getElementById("main-player");
+            const mainVideo = document.getElementById("main-video");
+            mainVideo.src = `https://www.youtube.com/embed/${videoId}`;
+            mainPlayer.style.display = "block";
         }
-
-        function loadMoreVideos() {
-            if (nextPageToken) {
-                fetchVideos(nextPageToken);
-            }
-        }
-
-        window.addEventListener("scroll", () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-                loadMoreVideos();
-            }
-        });
 
         fetchVideos();
     </script>
