@@ -19,13 +19,9 @@
         #main-player {
             width: 80%;
             max-width: 800px;
+            height: 450px;
             margin: 20px auto;
             display: none;
-        }
-
-        #main-player iframe {
-            width: 100%;
-            height: 450px;
         }
 
         .video-container {
@@ -48,8 +44,9 @@
         }
 
         @media (max-width: 600px) {
-            #main-player iframe {
-                height: 250px;
+            #main-player {
+                width: 100%;
+                height: auto;
             }
             .video-container {
                 flex-direction: column;
@@ -65,8 +62,8 @@
 <body>
     <h1>IQSOG - L'Innovation par la Valorisation</h1>
     
-    <div id="main-player">
-        <iframe id="main-video" src="" allowfullscreen></iframe>
+    <div id="main-player-container">
+        <iframe id="main-player" allowfullscreen></iframe>
     </div>
     
     <div class="video-container" id="videoContainer"></div>
@@ -99,7 +96,8 @@
 
         function displayVideos(videos) {
             const container = document.getElementById("videoContainer");
-            
+            const mainPlayer = document.getElementById("main-player");
+
             videos.forEach(video => {
                 const videoId = video.snippet.resourceId.videoId;
                 const title = video.snippet.title;
@@ -110,20 +108,13 @@
                     <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
                     <p>${title}</p>
                 `;
-                
-                videoElement.addEventListener("click", () => {
-                    showMainVideo(videoId);
-                });
-                
+                videoElement.onclick = () => {
+                    mainPlayer.src = `https://www.youtube.com/embed/${videoId}`;
+                    mainPlayer.style.display = "block";
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
                 container.appendChild(videoElement);
             });
-        }
-
-        function showMainVideo(videoId) {
-            const mainPlayer = document.getElementById("main-player");
-            const mainVideo = document.getElementById("main-video");
-            mainVideo.src = `https://www.youtube.com/embed/${videoId}`;
-            mainPlayer.style.display = "block";
         }
 
         fetchVideos();
